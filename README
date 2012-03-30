@@ -1,0 +1,29 @@
+LTU Engine Python Client
+------------------------
+
+Install
+-------
+
+Requirements will be installed
+
+  python setup.py install
+
+Note that python 2.6.+ or later is required. Your python version can be
+obtained by running:
+
+  python --version
+
+Test
+----
+
+Run all unit tests:
+
+  ./ltu/engine/testsunit.py
+
+Use
+---
+
+  from ltu.engine.client import QueryClient
+  client = QueryClient("my_application_key")
+  client.check_status()
+  print client.search_image_by_upload("/home/user/image.jpg")
