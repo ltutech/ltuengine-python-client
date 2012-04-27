@@ -16,8 +16,8 @@ class BaseClient(object):
   def __init__(self, application_key, server_url):
     """Constructor
     Args:
-      application_key: authentication key provided by the application.
-      server_url: complete http url to the OnDemand server.
+      application_key:  authentication key provided by the application.
+      server_url:       complete http url to the OnDemand server.
     """
     self.application_key = application_key
     self.server_url      = server_url
@@ -26,27 +26,6 @@ class BaseClient(object):
     """Combine a service name and the server url to produce the service url.
     """
     return urlparse.urljoin(self.server_url, service)
-
-  @classmethod
-  def get_file(cls, f):
-    """Return a file object in 'rb' mode, from either a file path or a file
-    object.
-
-    In case the input image is a file object, it is the user's responsibility
-    for closing it after use.
-
-    Args:
-      f: either a path to a file or a file instance
-    Returns:
-      a file object.
-
-    """
-    if isinstance(f, str):
-      return open(f, 'rb')
-    elif isinstance(f, file):
-      return f
-    else:
-      raise ValueError("Image object of unknown type: %s" % type(f))
 
   def get_data(self, params={}):
     """Return appropriate HTTP POST parameters and headers
@@ -57,7 +36,6 @@ class BaseClient(object):
       params: a dictionary with service-specific parameters
     Returns:
       data, headers to be passed to urllib2.Request constructor.
-
     """
     data      = [("application_key", self.application_key)]
     multipart = False
@@ -84,7 +62,7 @@ class BaseClient(object):
     Logs advice on actions to take as warnings in case of wrong status.
     """
     result = self.get_application_status()
-    if result.status_code >= 0:
+    if result.status_code == 0:
       return True
     else:
       return False
@@ -110,19 +88,17 @@ class BaseClient(object):
       result = client.get_application_status()
       if(result.status_code < 0):
         raise Exception(result.status_message)
-
     """
     result = self.open_service("GetApplicationStatus")
     return Result(result)
 
-  def get_image_by_id(self, image_id):
-    """Check if a an image exists in the database"""
+  def get_image(self, image_id):
+    """Search for an image based on its id."""
     result = self.open_service("GetImageById", params={"image_id": image_id})
     return Result(result)
 
 class QueryClient(BaseClient):
-  """Read-only client.
-  """
+  """Client that can run searches on an LTU Engine application."""
 
   DEFAULT_QUERY_URL = "https://api.ltu-engine.com/v2/ltuquery/json/"
 
@@ -138,20 +114,15 @@ class QueryClient(BaseClient):
       server_url = QueryClient.DEFAULT_QUERY_URL
     BaseClient.__init__(self, application_key, server_url)
 
-  def search_image_by_upload(self, image):
+  def search_image(self, image):
     """Image retrieval based on a image stored on disk
 
     Args:
-      image: can be either an image path or a file object.
-
-    Example:
-      image_path = "/home/user/image.jpg"
-      with open(image_path, 'rb') as image:
-        result = client.search_image_by_upload(image)
-
+      image: path to image file.
     """
-    result = self.open_service("SearchImageByUpload",
-                               params={"image_content": self.get_file(image)})
+    with open(image, 'rb') as img:
+      result = self.open_service("SearchImageByUpload",
+                                 params={"image_content": img})
     return Result(result)
 
   # TODO test this
@@ -169,17 +140,17 @@ class QueryClient(BaseClient):
     return Result(result)
 
 class ModifyClient(BaseClient):
-  """Client with write capabilities.
-  """
+  """Client that can modify an LTU Engine application, e.g: by adding and
+  removing images."""
 
   DEFAULT_MODIFY_URL = "https://api.ltu-engine.com/v2/ltumodify/json/"
 
   def __init__(self, application_key, server_url = None):
     """Constructor
     Args:
-      application_key: authentication key provided by the application.
-      server_url: complete http url to the OnDemand server. If it not
-                  specified, it will default to the production environment url.
+      application_key:  authentication key provided by the application.
+      server_url:       complete http url to the OnDemand server. If it is not
+                        specified, it will default to the default url.
     """
     if not server_url:
       server_url = ModifyClient.DEFAULT_MODIFY_URL
@@ -190,12 +161,13 @@ class ModifyClient(BaseClient):
 
     Args:
       image_id: any unique identifier
-      image:    can be either a path or a file object
-      keywords: a keyword strings iterable.
+      image:    path to image file
+      keywords: an iterator on a keyword strings
     """
-    result = self.open_service("AddImage", params={"image_id": image_id,
-                                                   "image_content": self.get_file(image),
-                                                   "keywords": keywords})
+    with open(image, 'rb') as img:
+      result = self.open_service("AddImage", params={"image_id": image_id,
+                                                     "image_content": img,
+                                                     "keywords": keywords})
     return Result(result)
 
   def delete_image(self, image_id):
