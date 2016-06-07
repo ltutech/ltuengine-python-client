@@ -36,7 +36,6 @@ class BaseClient(object):
       filtered_params, files to be passed to requests.
     """
     data = [("application_key", self.application_key)]
-    print(params)
     for key, val in params.items():
       if val is not None:
         if isinstance(val, (list, tuple, set)):
