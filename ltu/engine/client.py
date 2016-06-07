@@ -1,11 +1,9 @@
-import urllib, urllib2, urlparse, os
+import os
+import requests
 
-from poster.encode import multipart_encode
-from poster.streaminghttp import register_openers
 from result import Result
 
-# Register the streaming http handlers with urllib2
-register_openers()
+# Register the streaming http handlers with requests
 
 class BaseClient(object):
   """Base class from which ModifyClient and QueryClient inherit.
@@ -25,36 +23,29 @@ class BaseClient(object):
   def get_url(self, service):
     """Combine a service name and the server url to produce the service url.
     """
-    return urlparse.urljoin(self.server_url, service)
+    return requests.compat.urljoin(self.server_url, service)
 
   def get_data(self, params={}):
-    """Return appropriate HTTP POST parameters and headers
+    """Return appropriate HTTP POST parameters and optional file
 
     The application key is automatically added.
 
     Args:
       params: a dictionary with service-specific parameters
     Returns:
-      data, headers to be passed to urllib2.Request constructor.
+      filtered_params, files to be passed to requests.
     """
-    data      = [("application_key", self.application_key)]
-    multipart = False
-    for key, val in params.iteritems():
+    data = [("application_key", self.application_key)]
+    print(params)
+    for key, val in params.items():
       if val is not None:
-        if isinstance(val, file):
-          multipart = True
         if isinstance(val, (list, tuple, set)):
           for v in val:
             data.append((key, v));
         else:
           data.append((key, val))
 
-    if multipart:
-      datagen, headers = multipart_encode(data)
-    else:
-      datagen = urllib.urlencode(data)
-      headers = {}
-    return datagen, headers
+    return data
 
   def check_status(self):
     """Check that this client can successfully access your application.
@@ -67,7 +58,7 @@ class BaseClient(object):
     else:
       return False
 
-  def open_service(self, service, params={}):
+  def open_service(self, service, params={}, files=None):
     """Open corresponding API service with appropriate parameters.
 
     Args:
@@ -76,10 +67,10 @@ class BaseClient(object):
     Returns:
       The response content.
     """
-    data, headers = self.get_data(params=params)
-    url           = self.get_url(service)
-    request       = urllib2.Request(url, data, headers)
-    return urllib2.urlopen(request).read()
+    data    = self.get_data(params)
+    url     = self.get_url(service)
+    request = requests.post(url, data=data, files=files)
+    return request.text
 
   def get_application_status(self):
     """Check the application status.
@@ -122,7 +113,7 @@ class QueryClient(BaseClient):
     """
     with open(image, 'rb') as img:
       result = self.open_service("SearchImageByUpload",
-                                 params={"image_content": img})
+                                 files={"image_content": img})
     return Result(result)
 
   # TODO test this
@@ -165,9 +156,9 @@ class ModifyClient(BaseClient):
       keywords: an iterator on a keyword strings
     """
     with open(image, 'rb') as img:
-      result = self.open_service("AddImage", params={"image_id": image_id,
-                                                     "image_content": img,
-                                                     "keywords": keywords})
+      result = self.open_service("AddImage",
+                                 params={"image_id": image_id, "keywords": keywords},
+                                 files={"image_content": img})
     return Result(result)
 
   def delete_image(self, image_id):

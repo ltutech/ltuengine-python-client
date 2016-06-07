@@ -16,7 +16,7 @@ PARAMETERS = {
     'ltu.engine': 'ltu/engine',
     'ltu': 'ltu'
   },
-  'install_requires': ['unittest2', 'poster', 'mock'],
+  'install_requires': ['unittest2', 'mock', 'requests==2.10.0'],
   'author': "LTU technologies",
   'author_email': "support@ltutech.com",
   'maintainer': "LTU technologies",
