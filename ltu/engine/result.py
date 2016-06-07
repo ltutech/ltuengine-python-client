@@ -1,4 +1,5 @@
 import json
+import base64
 
 class Result(object):
   """Parse the server JSON response to produce a result.
@@ -85,3 +86,62 @@ Keywords   : %s
 Result Info: %s""" % (self.id, self.score, ', '.join(self.keywords), self.result_info)
 
 
+
+class FICResult(object):
+  """Parse the server JSON response to produce a Fine Image Comparison result.
+  """
+
+  def __init__(self, json_result):
+    """Parse a JSON result as produced by the OnDemand API.
+
+    Args:
+      json_result: JSON-formatted string
+    """
+
+    data = json.loads(json_result)
+
+    # Parsing status
+    status = data.get("status", {})
+    self.status_message = status.get("message", "")
+    self.status_code    = status.get("code", -1)
+
+    # Parsing reference image
+    self.reference_image_data = data.get("ref_image")
+
+    # Parsing query reference image
+    self.query_image_data = data.get("query_image")
+
+    # Result stats
+    self.score = data.get("score")
+
+  def __str__(self):
+    """String convertor"""
+
+    res = """
+Status Code    : %d
+Status Message : %s""" % (self.status_code, self.status_message)
+    res += """
+Score     : %d""" % self.score
+    return res
+
+  def _save_image(self, path, data):
+    with open(path, 'wb') as img:
+        img.write(base64.b64decode(data))
+
+  def save_query(self, path):
+    """Save query image with Fine Image Comparison
+    highlighted areas.
+
+    Args:
+      path: destination path
+    """
+    self._save_image(path, self.query_image_data)
+
+  def save_reference(self, path):
+    """Save reference image with Fine Image Comparison
+    highlighted areas.
+
+    Args:
+      path: destination path
+    """
+    self._save_image(path, self.reference_image_data)

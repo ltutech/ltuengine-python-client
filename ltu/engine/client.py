@@ -1,7 +1,7 @@
 import os
 import requests
 
-from result import Result
+from result import Result, FICResult
 
 # Register the streaming http handlers with requests
 
@@ -128,6 +128,27 @@ class QueryClient(BaseClient):
                                        starting_index, "nb_results":
                                        nb_results, "ids_list": ids_list})
     return Result(result)
+
+  def fine_image_comparison(self, reference_image, query_image):
+    """Compare two images using the Fine Image Comparison.
+    NOTE: This features works only on application with Fine
+    Image Comparison enabled. Contact the support for more
+    information.
+
+    Args:
+      reference_image: path to reference image file.
+      query_image: path to query image file.
+    """
+    try:
+        files = {}
+        files['reference_image'] = open(reference_image, 'rb')
+        files['query_image'] = open(query_image, 'rb')
+    except Exception as e:
+        print('Could not open one of the input files: {}'.format(e))
+        raise e
+    result = self.open_service("FineComparison", files=files)
+    return FICResult(result)
+
 
 class ModifyClient(BaseClient):
   """Client that can modify an LTU Engine application, e.g: by adding and
