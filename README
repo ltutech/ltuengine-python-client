@@ -6,15 +6,15 @@
 ABOUT THIS CLIENT
 ==============================================
 
-LTU technologies is a company that provides image recognition as a service.
+Jastec France is a company that provides image recognition as a service.
 This Python module is a client that allows you to access the HTTP API to
 perform image recognition tasks. For more information on image recognition,
-please visit http://www.ltutech.com.
+please visit http://www.jastec.fr.
 
 
 Note that this client cannot be used without a valid application key. Please
 contact our sales department to get your application key today
-(sales@ltutech.com).
+(sales@jastec.fr).
 
 ==============================================
 INSTALL
@@ -79,4 +79,4 @@ CREDITS & USAGE:
 
 Feel free to use any of the resources provided in this client.
 
-EMAIL: support@ltutech.com
+EMAIL: support@jastec.fr
