@@ -1,7 +1,7 @@
 import os
 import requests
 
-from result import Result, FICResult
+from ltu.engine.result import Result, FICResult
 
 # Register the streaming http handlers with requests
 
