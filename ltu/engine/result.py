@@ -73,6 +73,7 @@ Results:
 
 class Image:
   def __init__(self, image_dict):
+    self.data = image_dict
     self.keywords    = image_dict.get("keywords", [])
     self.score       = image_dict.get("score", 0.)
     self.id          = image_dict.get("id", "")
@@ -85,6 +86,11 @@ Score      : %f
 Keywords   : %s
 Result Info: %s""" % (self.id, self.score, ', '.join(self.keywords), self.result_info)
 
+  def save_json(self, filepath):
+      """Dump original data into a json file.
+      """
+      with open(filepath, 'w') as outfile:
+        json.dump(self.data, outfile, indent=2)
 
 
 class FICResult(object):
