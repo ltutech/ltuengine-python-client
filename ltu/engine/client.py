@@ -104,7 +104,7 @@ class QueryClient(BaseClient):
       server_url = QueryClient.DEFAULT_QUERY_URL
     BaseClient.__init__(self, application_key, server_url)
 
-  def search_image(self, image):
+  def search_image(self, image, params={}):
     """Image retrieval based on a image stored on disk
 
     Args:
@@ -112,7 +112,8 @@ class QueryClient(BaseClient):
     """
     with open(image, 'rb') as img:
       result = self.open_service("SearchImageByUpload",
-                                 files={"image_content": img})
+                                 files={"image_content": img},
+                                 params=params)
     return Result(result)
 
   # TODO test this
