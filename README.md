@@ -1,0 +1,67 @@
+# LTU engine/ON demand - Python Client
+
+## ABOUT THIS CLIENT
+Jastec France is a company that provides image recognition as a service.
+This Python module is a client that allows you to access the HTTP API to
+perform image recognition tasks. For more information on image recognition,
+please visit http://www.jastec.fr.
+
+
+Note that this client cannot be used without a valid application key. Please
+contact our sales department to get your application key today
+(sales@jastec.fr).
+
+## INSTALL
+The client comes in the form of a multiplatform python package. Although the
+package has been tested on linux platforms only, it should run fine under
+Windows.
+
+Package can be installed along with dependencies by running:
+```bash
+python setup.py install
+```
+
+Note that python 2.6.+ or later is required. Your python version can be
+obtained by running:
+```bash
+python --version
+```
+
+You can check everything is fine by running unit tests:
+```bash
+./ltu/engine/testsunit.py
+```
+
+## BASIC USAGE
+Adding images to the application is done through a ModifyClient instance:
+```python
+from ltu.engine.client import ModifyClient
+client = ModifyClient("my_application_key")
+print client.add_image("my_image_id", "/home/user/image.jpg")
+```
+
+Once you have at least one image in your application, you can start making
+search queries with a QueryClient instance:
+```python
+from ltu.engine.client import QueryClient
+client = QueryClient("my_application_key")
+print client.search_image("/home/user/image.jpg")
+```
+
+## ADVANCED USAGE
+For advanced usage, please consult the docstrings for each function.
+
+Note that clients to our OnDemand platform exist in other languages, including,
+but not limited to: Ruby, Perl, C/C++, Java, C#. These SDK are reserved to
+customers with valid application keys.
+
+## LICENSE
+This software is licensed under the terms of the Apache License 2.0. In
+particular, you are free to distribute it, modify it and to distribute modified
+versions as long as you include the attached NOTICE file with your software.
+Read the attached LICENSE file for more information.
+
+## CREDITS & USAGE:
+Feel free to use any of the resources provided in this client.
+
+EMAIL: support@jastec.fr
