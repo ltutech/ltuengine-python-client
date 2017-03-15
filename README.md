@@ -1,4 +1,5 @@
-# LTU engine/ON demand - Python Client
+
+# LTU Engine - Python Client
 
 ## ABOUT THIS CLIENT
 Jastec France is a company that provides image recognition as a service.
@@ -8,52 +9,50 @@ please visit http://www.jastec.fr.
 
 
 Note that this client cannot be used without a valid application key. Please
-contact our sales department to get your application key today
-(sales@jastec.fr).
+contact our support department to get your application key today
+(support@jastec.fr).
 
 ## INSTALL
 The client comes in the form of a multiplatform python package. Although the
 package has been tested on linux platforms only, it should run fine under
 Windows.
 
-Package can be installed along with dependencies by running:
+The package can be installed along with dependencies by running in a terminal:
 ```bash
 python setup.py install
 ```
 
-Note that python 2.6.+ or later is required. Your python version can be
-obtained by running:
+Note that python 2.6.+ or later is required.
+To know if python is already installed or to check the version use the following command:
 ```bash
 python --version
 ```
 
-You can check everything is fine by running unit tests:
+You can check everything is fine by running the unit tests:
 ```bash
 ./ltu/engine/testsunit.py
 ```
 
 ## BASIC USAGE
-Adding images to the application is done through a ModifyClient instance:
+Adding images to the application is done through the add_image() function of a ModifyClient instance:
 ```python
+my_application_key = "replace by your own key"
 from ltu.engine.client import ModifyClient
-client = ModifyClient("my_application_key")
-print client.add_image("my_image_id", "/home/user/image.jpg")
+modify_client = ModifyClient(my_application_key)
+print(modify_client.add_image("my_image_id", "/home/user/image.jpg"))
 ```
 
 Once you have at least one image in your application, you can start making
-search queries with a QueryClient instance:
+search queries by using the sear_image() function of a  QueryClient instance:
 ```python
 from ltu.engine.client import QueryClient
-client = QueryClient("my_application_key")
-print client.search_image("/home/user/image.jpg")
+query_client = QueryClient(my_application_key)
+print(query_client.search_image("/home/user/image.jpg"))
 ```
 
 ## ADVANCED USAGE
-For advanced usage, please consult the docstrings for each function.
 
-Note that clients to our OnDemand platform exist in other languages, including,
-but not limited to: Ruby, Perl, C/C++, Java, C#. These SDK are reserved to
-customers with valid application keys.
+For advanced usage, please consult the docstrings for each function.
 
 ## LICENSE
 This software is licensed under the terms of the Apache License 2.0. In
