@@ -1,9 +1,12 @@
+import logging
 import os
 import requests
 
 from ltu.engine.result import Result, FICResult
 
-# Register the streaming http handlers with requests
+# disable some requests warning and info messages
+requests.packages.urllib3.disable_warnings()
+logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.ERROR)
 
 class BaseClient(object):
   """Base class from which ModifyClient and QueryClient inherit.
@@ -68,8 +71,8 @@ class BaseClient(object):
     """
     data    = self.get_data(params)
     url     = self.get_url(service)
-    request = requests.post(url, data=data, files=files)
-    return request.text
+    response = requests.post(url, data=data, files=files, verify=False)
+    return response.text
 
   def get_application_status(self):
     """Check the application status.
