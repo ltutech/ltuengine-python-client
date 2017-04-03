@@ -177,14 +177,17 @@ class ModifyClient(BaseClient):
       server_url = ModifyClient.DEFAULT_MODIFY_URL
     BaseClient.__init__(self, application_key, server_url)
 
-  def add_image(self, image_id, image, keywords=[]):
+
+  def add_image(self, image, image_id=None, keywords=[]):
     """Add an image to the database
 
     Args:
-      image_id: any unique identifier
       image:    path to image file
+      image_id: any unique identifier
       keywords: an iterator on a keyword strings
     """
+    if not image_id:
+      image_id = os.path.basename(image)
     with open(image, 'rb') as img:
       result = self.open_service("AddImage",
                                  params={"image_id": image_id, "keywords": keywords},
