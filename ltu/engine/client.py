@@ -22,6 +22,8 @@ class BaseClient(object):
     """
     self.application_key = application_key
     self.server_url      = server_url
+    if not self.server_url[-1] == '/':
+      self.server_url += '/'
     assert self.check_status(), "Could not connect to your application"
 
   def get_url(self, service):
@@ -106,9 +108,10 @@ class QueryClient(BaseClient):
       server_url: complete http url to the OnDemand server. If it not
                   specified, it will default to the default url.
     """
+    self.server_url = server_url
     if not server_url:
-      server_url = QueryClient.DEFAULT_QUERY_URL
-    BaseClient.__init__(self, application_key, server_url)
+      self.server_url = QueryClient.DEFAULT_QUERY_URL
+    BaseClient.__init__(self, application_key, self.server_url)
 
   def search_image(self, image, params={}):
     """Image retrieval based on a image stored on disk
