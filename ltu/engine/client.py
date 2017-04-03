@@ -199,3 +199,6 @@ class ModifyClient(BaseClient):
     result = self.open_service("DeleteImage", params={"image_id": image_id})
     return Result(result)
 
+  def delete_imagefile(self, file):
+    image_id = os.path.basename(image)
+    self.delete_image(image_id)
