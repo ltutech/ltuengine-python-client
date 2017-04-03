@@ -39,7 +39,7 @@ Adding images to the application is done through the add_image() function of a M
 my_application_key = "replace by your own key"
 from ltu.engine.client import ModifyClient
 modify_client = ModifyClient(my_application_key)
-print(modify_client.add_image("my_image_id", "/home/user/image.jpg"))
+print(modify_client.add_image("/home/user/image.jpg", "my_image_id"))
 ```
 
 Once you have at least one image in your application, you can start making
