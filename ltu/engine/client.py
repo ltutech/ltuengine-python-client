@@ -73,6 +73,8 @@ class BaseClient(object):
     data    = self.get_data(params)
     url     = self.get_url(service)
     response = requests.post(url, data=data, files=files, verify=False)
+    # check that we do not have HTTP error first
+    response.raise_for_status()
     return response.text
 
   def get_application_status(self):
