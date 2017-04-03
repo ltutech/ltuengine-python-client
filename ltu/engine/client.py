@@ -22,6 +22,7 @@ class BaseClient(object):
     """
     self.application_key = application_key
     self.server_url      = server_url
+    assert self.check_status(), "Could not connect to your application"
 
   def get_url(self, service):
     """Combine a service name and the server url to produce the service url.
