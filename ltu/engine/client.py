@@ -1,6 +1,8 @@
 import logging
 import os
 import requests
+from requests.packages.urllib3.util.retry import Retry
+from requests.adapters import HTTPAdapter
 
 from ltu.engine.result import Result, FICResult
 
@@ -24,6 +26,13 @@ class BaseClient(object):
     self.server_url      = server_url
     if not self.server_url[-1] == '/':
       self.server_url += '/'
+    # improve connection rebustness with retries
+    self.session = requests.Session()
+    retries = Retry(total=5,
+                    backoff_factor=0.1,
+                    status_forcelist=[ 500, 502, 503, 504 ])
+    self.session.mount('http://', HTTPAdapter(max_retries=retries))
+    self.session.mount('https://', HTTPAdapter(max_retries=retries))
     assert self.check_status(), "Could not connect to your application"
 
   def get_url(self, service):
@@ -74,7 +83,7 @@ class BaseClient(object):
     """
     data    = self.get_data(params)
     url     = self.get_url(service)
-    response = requests.post(url, data=data, files=files, verify=False)
+    response = self.session.post(url, data=data, files=files, verify=False)
     # check that we do not have HTTP error first
     response.raise_for_status()
     return response.text
