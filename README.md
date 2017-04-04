@@ -26,7 +26,6 @@ python --version
 In first, install virtualenv  by typing the folling command in a terminal:
 ```bash
 sudo apt-get install virtualenv
-
 ```
 
 Then, create and activate your dev environment in the project folder.
@@ -36,7 +35,7 @@ virtualenv env
 source env/bin/activate
 ```
 
-The package can be installed along with dependencies by runningÒ:
+The package can be installed along with dependencies by running:
 ```bash
 python setup.py install
 ```
@@ -52,7 +51,7 @@ Adding images to the application is done through the add_image() function of a M
 my_application_key = "replace by your own key"
 from ltu.engine.client import ModifyClient
 modify_client = ModifyClient(my_application_key)
-print(modify_client.add_image("/home/user/image.jpg", "my_image_id"))
+print(modify_client.add_image("my_image_id", "/home/user/image.jpg"))
 ```
 
 Once you have at least one image in your application, you can start making
@@ -68,10 +67,10 @@ print(query_client.search_image("/home/user/image.jpg"))
 For advanced usage, please consult the docstrings for each function.
 
 ## EXEMPLE
-An example is provided to quickly test the ADD and DELETE feature.
+An example is provided to quickly test the ADD, SEARCH and DELETE API functions.
 You have to execute the file cli.py by specifing these parameters:
 Positional arguments:
-  ACTION
+  ACTION: add, search, del or bench(test the 3 functions in one action)
   APPLICATION_KEY
   INPUT_DIR
 
@@ -87,8 +86,12 @@ python ./ltu/engine/cli.py add application_key ./data -n 4
 ```
 
 If the parameter host is not specified, the script will hit the LTU OnDemand API.
-Otherwise, you can specify your own server by adding the correct url after --host.
-The url for the modify API is: http://x.x.x.x:7789/api/v2.0/ltumodify/json/
+Otherwise, you can specify your own server by adding the domain name or the IP address after --host.
+Don't forget to specify http or https.
+```bash
+python ./ltu/engine/cli.py add application_key ./data --host http://10.5.20.56 -n 4
+python ./ltu/engine/cli.py add application_key ./data --host http://mydomainname.com -n 4
+```
 
 ## LICENSE
 This software is licensed under the terms of the Apache License 2.0. In

@@ -39,17 +39,16 @@ def run_task_multi_thread(action_function, files, action_label, nb_threads=2, of
 
 
 @begin.start
-def ltuengine_process_dir(actions, application_key, input_dir, host=None, nb_threads="1", offset=0):
+def ltuengine_process_dir(actions: "A list(separate each action by a comma) of actions to execute on a folder: add|delete|search or bench(that performs 'del,add,search,del') ",
+                          application_key: "LTU Engine application key",
+                          input_dir:"Folder with all needed inputs",
+                          host:"server URL that hosts the application, default is LTU OnDemand"=None,
+                          nb_threads:"a list(separate each action by a comma) of number of threads"="1",
+                          offset:"starting offset"=0):
     """
-    Parse given directory for images and perform an action [add|delete] on given LTU Engine
+    Parse given directory for images and perform action [add|search|delete] on given LTU Engine
     application. Useful to add/delete a batch of images on multiple threads.
-    Params:
-     - actions: A list(,) of actions to perform on folder [add|delete|search] or 'bench' that perform 'del,add,search,del'
-     - application_key: LTU Engine application key
-     - input_dir: Folder with all needed inputs
-     - [host]: server URL that host the application, default is LTU OnDemand. Custom server.
-     - [nb_threads]: a list(,) of number of threads
-     - [offset]: starting offset
+
     """
     coloredlogs.install(level='info')
     ## process input parameters
