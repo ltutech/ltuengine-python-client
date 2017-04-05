@@ -56,7 +56,7 @@ print(modify_client.add_image("/home/user/image.jpg", "my_image_id"))
 ```
 
 Once you have at least one image in your application, you can start making
-search queries by using the sear_image() function of a  QueryClient instance:
+search queries by using the search_image() function of a  QueryClient instance:
 ```python
 from ltu.engine.client import QueryClient
 query_client = QueryClient(my_application_key)
