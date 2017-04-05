@@ -1,3 +1,8 @@
 *.pyc
 .*.swp
 .DS_Store
+dist
+env*
+*.egg-info
+.vscode
+build
