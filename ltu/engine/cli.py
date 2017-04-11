@@ -6,7 +6,7 @@ import begin
 import coloredlogs
 from tqdm import tqdm
 
-from client import ModifyClient
+from client import QueryClient, ModifyClient
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +16,8 @@ def run_task_mono_thread(action_function, files, action_label, nb_threads=1, off
     """
     for file in files[offset:]:
         logger.info("%s: %s" % (action_label, file))
-        action_function(file)
+        print("%s: %s" % (action_label, file))
+        print(action_function(file))
 
 
 def run_task_multi_thread(action_function, files, action_label, nb_threads=2, offset=0):
@@ -55,6 +56,7 @@ def ltuengine_process_dir(action, application_key, input_dir, host=None, nb_thre
     assert files, "No input file found in %s" % input_dir
     # create modify client
     modifyClient = ModifyClient(application_key, server_url=host)
+    queryClient = QueryClient(application_key, server_url=host)
     # get the appropriate function to run the task
     # - run_task_mono_thread will run on 1 thread and show some logs
     # - run_task_multi_thread will run on multiple threads and use a progress bar
@@ -66,5 +68,8 @@ def ltuengine_process_dir(action, application_key, input_dir, host=None, nb_thre
     elif action == "del":
         logger.info("Deleting directory %s images from application %s" % (input_dir, application_key))
         run_task(modifyClient.delete_image, files, "Deleting image", nb_threads, offset)
+    elif action == "search":
+        logger.info("Searching directory %s images into application %s" % (input_dir, application_key))
+        run_task(queryClient.search_image, files, "Searching image", nb_threads, offset)
     else:
         assert False, "Unknown action"
