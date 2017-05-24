@@ -76,7 +76,7 @@ def ltuengine_process_dir(action, application_key, input_dir, host=None, nb_thre
             run_task(modifyClient.add_image, files, "Adding image", nb_threads, offset)
         elif action == "del":
             logger.info("Deleting directory %s images from application %s" % (input_dir, application_key))
-            run_task(modifyClient.delete_image, files, "Deleting image", nb_threads, offset)
+            run_task(modifyClient.delete_imagefile, files, "Deleting image", nb_threads, offset)
         elif action == "search":
             logger.info("Searching directory %s images into application %s" % (input_dir, application_key))
             run_task(queryClient.search_image, files, "Searching image", nb_threads, offset)

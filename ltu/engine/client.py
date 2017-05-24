@@ -209,5 +209,5 @@ class ModifyClient(BaseClient):
     return Result(result)
 
   def delete_imagefile(self, file):
-    image_id = os.path.basename(image)
+    image_id = os.path.basename(file)
     self.delete_image(image_id)
