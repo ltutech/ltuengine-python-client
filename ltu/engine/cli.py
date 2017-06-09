@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import glob
 import logging
 from multiprocessing.dummy import Pool
+import os
 import time
 
 import begin
@@ -63,7 +63,10 @@ def ltuengine_process_dir(actions, application_key, input_dir, host=None, nb_thr
         all_threads[i] = int(all_threads[i])
     # other parameters
     offset = int(offset)
-    files = glob.glob("{}/*".format(input_dir))
+    files = []
+    for dirpath, dnames, fnames in os.walk(input_dir):
+      for file in fnames:
+          files.append(os.path.join(dirpath, file))
     assert files, "No input file found in %s" % input_dir
     nb_files = len(files) - offset
     # create clients
