@@ -8,6 +8,7 @@ from ltu.engine.result import Result, FICResult
 
 # disable some requests warning and info messages
 requests.packages.urllib3.disable_warnings()
+logger = logging.getLogger('__main__')
 logging.getLogger('requests.packages.urllib3.connectionpool').setLevel(logging.ERROR)
 
 class BaseClient(object):
@@ -23,9 +24,11 @@ class BaseClient(object):
       server_url:       complete http url to the OnDemand server.
     """
     self.application_key = application_key
-    self.server_url      = server_url
-    if not self.server_url[-1] == '/':
-      self.server_url += '/'
+    self.base_server_url = server_url
+    self.server_url = server_url
+    if self.base_server_url[-1] == '/':
+      self.base_server_url = self.base_server_url[:-1]
+    self.server_url = self.base_server_url
     # improve connection rebustness with retries
     self.session = requests.Session()
     retries = Retry(total=5,
@@ -33,7 +36,25 @@ class BaseClient(object):
                     status_forcelist=[ 500, 502, 503, 504 ])
     self.session.mount('http://', HTTPAdapter(max_retries=retries))
     self.session.mount('https://', HTTPAdapter(max_retries=retries))
-    assert self.check_status(), "Could not connect to your application"
+
+  def _connect(self, url_list=[]):
+    """Connect to remote server using a list of possible API paths.
+       It will try them all to perform auto-discovery of the right URL.
+    """
+    logger.info('Auto discovering API path with base server URL: %s' % self.base_server_url)
+    full_urls = ["%s%s" % (self.base_server_url, url) for url in url_list]
+    # Test all API paths
+    for url in full_urls:
+      try:
+        self.server_url = url
+        logger.debug('Testing URL: %s' % self.server_url)
+        status = self.check_status()
+        if status:
+          logger.info('API path found at: %s' % url)
+          return True
+      except:
+        pass
+    raise Exception("Could not connect to your application")
 
   def get_url(self, service):
     """Combine a service name and the server url to produce the service url.
@@ -83,6 +104,7 @@ class BaseClient(object):
     """
     data    = self.get_data(params)
     url     = self.get_url(service)
+    logger.debug("Sending '%s' request to: %s" % (service, url))
     response = self.session.post(url, data=data, files=files, verify=False)
     # check that we do not have HTTP error first
     response.raise_for_status()
@@ -117,10 +139,17 @@ class QueryClient(BaseClient):
       server_url: complete http url to the OnDemand server. If it not
                   specified, it will default to the default url.
     """
+    logger.info('Starting query client...')
     self.server_url = server_url
     if not server_url:
       self.server_url = QueryClient.DEFAULT_QUERY_URL
     BaseClient.__init__(self, application_key, self.server_url)
+    url_list = [':8080/api/v2.0/ltuquery/json/',
+                '/api/v2.0/ltuquery/json/',
+                ':8080/api/v2/ltuquery/json/',
+                '/api/v2/ltuquery/json/',
+    ]
+    BaseClient._connect(self, url_list)
 
   def search_image(self, image, params={}):
     """Image retrieval based on a image stored on disk
@@ -182,9 +211,16 @@ class ModifyClient(BaseClient):
       server_url:       complete http url to the OnDemand server. If it is not
                         specified, it will default to the default url.
     """
+    logger.info('Starting modify client...')
     if not server_url:
       server_url = ModifyClient.DEFAULT_MODIFY_URL
     BaseClient.__init__(self, application_key, server_url)
+    url_list = [':7789/api/v2.0/ltumodify/json/',
+                '/api/v2.0/ltumodify/json/',
+                ':7789/api/v2/ltumodify/json/',
+                '/api/v2/ltumodify/json/',
+    ]
+    BaseClient._connect(self, url_list)
 
 
   def add_image(self, image, image_id=None, keywords=[]):
