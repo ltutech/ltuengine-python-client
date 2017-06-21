@@ -72,8 +72,6 @@ def ltuengine_process_dir(actions, application_key, input_dir, host=None, nb_thr
     # create clients
     logger.info("")
     modifyClient = ModifyClient(application_key, server_url=host)
-    logger.info("")
-    queryClient = QueryClient(application_key, server_url=host)
     benchs = []
     for nb_threads in all_threads:
         for action in actions_list:
@@ -91,6 +89,8 @@ def ltuengine_process_dir(actions, application_key, input_dir, host=None, nb_thr
                 logger.info("Deleting directory %s images from application %s" % (input_dir, application_key))
                 run_task(modifyClient.delete_imagefile, files, "Deleting image", nb_threads, offset)
             elif action == "search":
+                logger.info("")
+                queryClient = QueryClient(application_key, server_url=host)
                 logger.info("Searching directory %s images into application %s" % (input_dir, application_key))
                 run_task(queryClient.search_image, files, "Searching image", nb_threads, offset)
             else:
