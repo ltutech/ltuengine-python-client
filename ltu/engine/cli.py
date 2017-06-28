@@ -64,9 +64,9 @@ def ltuengine_process_dir(actions, application_key, input_dir, host=None, nb_thr
     # other parameters
     offset = int(offset)
     files = []
-    for dirpath, dnames, fnames in os.walk(input_dir):
-      for file in fnames:
-          files.append(os.path.join(dirpath, file))
+    for dirpath, _, fnames in os.walk(input_dir):
+        for file in fnames:
+            files.append(os.path.join(dirpath, file))
     assert files, "No input file found in %s" % input_dir
     nb_files = len(files) - offset
     # create clients
