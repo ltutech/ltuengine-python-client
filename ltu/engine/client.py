@@ -24,10 +24,7 @@ class BaseClient(object):
       server_url:       complete http url to the OnDemand server.
     """
     self.application_key = application_key
-    self.base_server_url = server_url
-    self.server_url = server_url
-    if self.base_server_url[-1] == '/':
-      self.base_server_url = self.base_server_url[:-1]
+    self.base_server_url = server_url.rstrip('/')
     self.server_url = self.base_server_url
     # improve connection rebustness with retries
     self.session = requests.Session()
