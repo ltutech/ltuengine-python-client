@@ -79,10 +79,13 @@ Optional arguments:
   --host HOST, -h HOST  (default:  None)
   --nb-threads NB_THREADS, -n NB_THREADS
                         (default: 1)
+  --force               force actions already processed on a file
+
+Result of queries are saved in a Json file in the folder "out_result". Every actions already performed on a file won't be executed a second time (except in bench mode) unless the parameter --force is specified.
 
 Here, an example for the ADD feature. A folder containing 5 images is available in this client: ./data
 ```bash
-python ./ltu/engine/cli.py add application_key ./data -n 4
+python ./ltu/engine/cli.py add application_key --force ./data -n 4
 ```
 
 If the parameter host is not specified, the script will hit the LTU OnDemand API.

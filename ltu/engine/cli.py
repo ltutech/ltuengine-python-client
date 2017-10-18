@@ -56,9 +56,10 @@ def run_task_multi_thread(action_function, files, action_label, force_action=Tru
         pass
 
 def create_images_paths(actions_list, input_dir, force):
-
+    # return for each image, a dictionary with the in and out paths
+    
     # create results paths if they don't exist
-    #result main repertory: out_result
+    # result main repertory: out_result
     out_base_path = os.path.join(os.getcwd(), "out_result")
     if not os.path.exists(out_base_path):
         os.mkdir(out_base_path)
@@ -70,16 +71,16 @@ def create_images_paths(actions_list, input_dir, force):
             os.mkdir(action_path)
 
     files = []
-    b_file = False #indicate if there are files to process
+    b_file = False #indicate if there are files to performed
 
     for dirpath, _, fnames in os.walk(input_dir):
-        #relative path from the input image folder, repertory per repertory
+        #relative path from the input images folder, repertory per repertory
         relativ_path = os.path.relpath(dirpath,input_dir)
 
         if relativ_path == ".":
             relativ_path = ""
 
-        #create results repertories
+        #create actions repertories
         for action in actions_list:
             complete_path = os.path.join(out_base_path, action, relativ_path)
             if not os.path.exists(complete_path):
@@ -148,7 +149,7 @@ def ltuengine_process_dir(actions: "A list(separate each action by a comma) of a
 
     if files:
         nb_files = len(files) - offset
-        # create clients
+        # create client
         logger.info("")
         modifyClient = ModifyClient(application_key, server_url=host)
         benchs = []
