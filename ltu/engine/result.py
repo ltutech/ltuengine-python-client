@@ -1,5 +1,6 @@
 import json
 import base64
+import os
 
 class Result(object):
   """Parse the server JSON response to produce a result.
@@ -11,26 +12,25 @@ class Result(object):
     Args:
       json_result: JSON-formatted string
     """
-
-    data    = json.loads(json_result)
+    self.data    = json.loads(json_result)
 
     # Parsing status
-    status = data.get("status", {})
+    status = self.data.get("status", {})
     self.status_message = status.get("message", "")
     self.status_code    = status.get("code", -1)
 
     # Parsing image
-    image_dict = data.get("image")
+    image_dict = self.data.get("image")
     self.image = Image(image_dict) if image_dict else None
 
     # Parsing images
     self.images = []
-    for image in data.get("images", []):
+    for image in self.data.get("images", []):
       self.images.append(Image(image))
 
     # Result stats
-    self.nb_results_found = data.get("nb_results_found")
-    self.nb_loaded_images = data.get("nb_loaded_images")
+    self.nb_results_found = self.data.get("nb_results_found")
+    self.nb_loaded_images = self.data.get("nb_loaded_images")
 
     # Task status
     self.task_id = None
@@ -38,6 +38,11 @@ class Result(object):
     self.task_status_code    = None
     self.task_status_message = ""
 
+  def save_json(self,image):
+    """Dump original data into a json file.
+    """
+    with open(image, 'w') as outfile:
+        json.dump(self.data, outfile, indent=2)
 
   def __str__(self):
     """String convertor"""
@@ -69,6 +74,7 @@ Results:
 ------------------------------------------
 """ + '\n-----------------------------------------\n'.join(map(str, self.images))
     return res
+
 
 
 class Image:

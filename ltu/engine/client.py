@@ -3,6 +3,7 @@ import os
 import requests
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
+import json
 
 from ltu.engine.result import Result, FICResult
 
@@ -154,6 +155,7 @@ class QueryClient(BaseClient):
     Args:
       image: path to image file.
     """
+    #complete_path = image["dir_path"] + "/" + image["file_name"]
     with open(image, 'rb') as img:
       result = self.open_service("SearchImageByUpload",
                                  files={"image_content": img},
@@ -243,4 +245,4 @@ class ModifyClient(BaseClient):
 
   def delete_imagefile(self, file):
     image_id = os.path.basename(file)
-    self.delete_image(image_id)
+    return self.delete_image(image_id)
