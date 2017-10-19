@@ -27,13 +27,16 @@ def run_single_task(items):
     in_file = items[0]["in"]
     action_function = items[1]
     action = get_action_name_from_function(items[1])
-    out_file = items[0][action]
+    out_file = ""
+    if  action in items[0]:
+        out_file = items[0][action]
 
-    #launch action
-    result = action_function(in_file)
+    if out_file:
+        #launch action
+        result = action_function(in_file)
 
-    #save the result in a json file
-    result.save_json(out_file)
+        #save the result in a json file
+        result.save_json(out_file)
 
 def run_task_mono_thread(action_function, files, action_label, force_action=True, nb_threads=1, offset=0):
     """Run given action on every files, one at a time.
