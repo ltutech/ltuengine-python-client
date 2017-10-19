@@ -34,11 +34,7 @@ def run_single_task(items):
 
     #save the result in a json file
     result.save_json(out_file)
-    print ("Result ", result)
-
-
-
-
+    
 def run_task_mono_thread(action_function, files, action_label, force_action=True, nb_threads=1, offset=0):
     """Run given action on every files, one at a time.
     """
