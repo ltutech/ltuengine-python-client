@@ -155,7 +155,6 @@ class QueryClient(BaseClient):
     Args:
       image: path to image file.
     """
-    #complete_path = image["dir_path"] + "/" + image["file_name"]
     with open(image, 'rb') as img:
       result = self.open_service("SearchImageByUpload",
                                  files={"image_content": img},
