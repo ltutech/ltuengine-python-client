@@ -76,8 +76,6 @@ Results:
 """ + '\n-----------------------------------------\n'.join(map(str, self.images))
     return res
 
-
-
 class Image:
   def __init__(self, image_dict):
     self.data = image_dict
