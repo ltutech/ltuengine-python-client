@@ -16,18 +16,26 @@ from ltu.engine.result import Result
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+def get_action_name_from_function(function):
+    """return from a function (add_image, search_image, delete_image) the name of the action concerned
+    """
+    return function.__name__.split('_')[0]
+
 def run_single_task(items):
+    """Run given action for one file
+    """
     in_file = items[0]["in"]
     action_function = items[1]
-    action = items[1].__name__.split('_')[0]
+    action = get_action_name_from_function(items[1])
     out_file = items[0][action]
 
     #launch action
     result = action_function(in_file)
-    print ("Result ", result)
 
     #save the result in a json file
     result.save_json(out_file)
+    print ("Result ", result)
+
 
 
 
@@ -55,9 +63,12 @@ def run_task_multi_thread(action_function, files, action_label, force_action=Tru
     for item in progress_bar_items:
         pass
 
-def create_images_paths(actions_list, input_dir, force):
-    # return for each image, a dictionary with the in and out paths
-    
+def generate_action(actions_list, input_dir, force):
+    """Generate a list of actions to process per image. For each image are saved:
+        - input path of the image
+        - out path where save the result for each action to perform
+    """
+
     # create results paths if they don't exist
     # result main repertory: out_result
     out_base_path = os.path.join(os.getcwd(), "out_result")
