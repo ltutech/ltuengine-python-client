@@ -12,6 +12,7 @@ class Result(object):
     Args:
       json_result: JSON-formatted string
     """
+    #todo: add a system to not save the data twice
     self.data    = json.loads(json_result)
 
     # Parsing status
