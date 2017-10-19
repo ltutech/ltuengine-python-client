@@ -34,7 +34,7 @@ def run_single_task(items):
 
     #save the result in a json file
     result.save_json(out_file)
-    
+
 def run_task_mono_thread(action_function, files, action_label, force_action=True, nb_threads=1, offset=0):
     """Run given action on every files, one at a time.
     """
@@ -59,7 +59,7 @@ def run_task_multi_thread(action_function, files, action_label, force_action=Tru
     for item in progress_bar_items:
         pass
 
-def generate_action(actions_list, input_dir, force):
+def generate_actions_list_per_images(actions_list, input_dir, force):
     """Generate a list of actions to process per image. For each image are saved:
         - input path of the image
         - out path where save the result for each action to perform
@@ -152,7 +152,7 @@ def ltuengine_process_dir(actions: "A list(separate each action by a comma) of a
 
     #get input and output files path for each image
     files = []
-    files = create_images_paths(actions_list, input_dir, force)
+    files = generate_actions_list_per_images(actions_list, input_dir, force)
 
     if files:
         nb_files = len(files) - offset
