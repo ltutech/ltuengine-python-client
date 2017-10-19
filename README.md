@@ -70,7 +70,7 @@ For advanced usage, please consult the docstrings for each function.
 An example is provided to quickly test the ADD, SEARCH and DELETE API functions.
 You have to execute the file cli.py by specifing these parameters:
 Positional arguments:
-  ACTION: add, search, del or bench(test the 3 functions in one action)
+  ACTION: add, search, delete or bench(test the 3 functions in one action)
   APPLICATION_KEY
   INPUT_DIR
 
