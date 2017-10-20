@@ -67,18 +67,25 @@ def generate_actions_list_per_images(actions_list, input_dir, force):
         - input path of the image
         - out path where save the result for each action to perform
     """
-
     # create results paths if they don't exist
     # result main repertory: out_result
     out_base_path = os.path.join(os.getcwd(), "out_result")
     if not os.path.exists(out_base_path):
-        os.mkdir(out_base_path)
+        try:
+            os.mkdir(out_base_path)
+        except Exception as e:
+            print('Could not create the out path "out_result": {}'.format(e))
+            raise e
 
     #create one result folder per action
     for action in actions_list:
         action_path = os.path.join(out_base_path, action)
         if not os.path.exists(action_path):
-            os.mkdir(action_path)
+            try:
+                os.mkdir(action_path)
+            except Exception as e:
+                print('Could not create the action {} out path: {}'.format(e,action))
+                raise e
 
     files = []
     b_file = False #indicate if there are files to performed
@@ -94,7 +101,11 @@ def generate_actions_list_per_images(actions_list, input_dir, force):
         for action in actions_list:
             complete_path = os.path.join(out_base_path, action, relativ_path)
             if not os.path.exists(complete_path):
-                os.mkdir(complete_path)
+                try:
+                    os.mkdir(complete_path)
+                except Exception as e:
+                    print('Could not create the out path {}: {}'.format(complete_path, e))
+                    raise e
 
         for file in fnames:
             # files_path["in"]: input image file path
@@ -146,6 +157,14 @@ def ltuengine_process_dir(actions: "A list(separate each action by a comma) of a
         actions = "delete,add,search,delete"
         force = True # for a bench actions are forced to be performed
     actions_list = actions.split(',')
+
+    #verify if the action call is valid
+    actions = ["add","search","delete"]
+    for a in actions_list:
+        if a not in actions:
+            print("Process Stopped !")
+            assert False, "Unknown action {}".format(a)
+
     # get all threads nbr
     all_threads = nb_threads.split(',')
     for i in range(0, len(all_threads)):
@@ -173,13 +192,13 @@ def ltuengine_process_dir(actions: "A list(separate each action by a comma) of a
                 # - run_task_multi_thread will run on multiple threads and use a progress bar
                 run_task = run_task_mono_thread if nb_threads == 1 else run_task_multi_thread
                 # get the action to perform
-                if action == "add":
+                if action == actions[0]:
                     logger.info("Adding directory %s images into application %s" % (input_dir, application_key))
                     run_task(modifyClient.add_image, files, "Adding image", force, nb_threads, offset)
-                elif action == "delete":
+                elif action == actions[2]:
                     logger.info("Deleting directory %s images from application %s" % (input_dir, application_key))
                     run_task(modifyClient.delete_imagefile, files, "Deleting image", force, nb_threads, offset)
-                elif action == "search":
+                elif action == actions[1]:
                     logger.info("")
                     queryClient = QueryClient(application_key, server_url=host)
                     logger.info("Searching directory %s images into application %s" % (input_dir, application_key))
