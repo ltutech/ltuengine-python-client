@@ -4,6 +4,7 @@ import logging
 from multiprocessing.dummy import Pool
 import os
 import time
+import sys
 
 import begin
 import coloredlogs
@@ -74,8 +75,8 @@ def generate_actions_list_per_images(actions_list, input_dir, force):
         try:
             os.mkdir(out_base_path)
         except Exception as e:
-            print('Could not create the out path "out_result": {}'.format(e))
-            raise e
+            logger.critical('Could not create the out path "out_result": {}'.format(e))
+            sys.exit(-1)
 
     #create one result folder per action
     for action in actions_list:
@@ -84,8 +85,8 @@ def generate_actions_list_per_images(actions_list, input_dir, force):
             try:
                 os.mkdir(action_path)
             except Exception as e:
-                print('Could not create the action {} out path: {}'.format(e,action))
-                raise e
+                logger.critical('Could not create the action {} out path: {}'.format(e,action))
+                sys.exit(-1)
 
     files = []
     b_file = False #indicate if there are files to performed
@@ -104,8 +105,8 @@ def generate_actions_list_per_images(actions_list, input_dir, force):
                 try:
                     os.mkdir(complete_path)
                 except Exception as e:
-                    print('Could not create the out path {}: {}'.format(complete_path, e))
-                    raise e
+                    logger.critical('Could not create the out path {}: {}'.format(complete_path, e))
+                    sys.exit(-1)
 
         for file in fnames:
             # files_path["in"]: input image file path
@@ -162,8 +163,8 @@ def ltuengine_process_dir(actions: "A list(separate each action by a comma) of a
     actions = ["add","search","delete"]
     for a in actions_list:
         if a not in actions:
-            print("Process Stopped !")
-            assert False, "Unknown action {}".format(a)
+            logger.error("Unknown action {}".format(a))
+            sys.exit(-1)
 
     # get all threads nbr
     all_threads = nb_threads.split(',')
@@ -203,9 +204,7 @@ def ltuengine_process_dir(actions: "A list(separate each action by a comma) of a
                     queryClient = QueryClient(application_key, server_url=host)
                     logger.info("Searching directory %s images into application %s" % (input_dir, application_key))
                     run_task(queryClient.search_image, files, "Searching image", force, nb_threads, offset)
-                else:
-                    assert False, "Unknown action"
-
+            
                 end_time = (time.time() - start_time)
                 bench = "%s done, %d images, in %f sec on %d threads, %f images per sec" % (action, nb_files, end_time, nb_threads, nb_files/end_time)
                 logger.info(bench)

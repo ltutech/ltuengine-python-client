@@ -3,6 +3,8 @@ import os
 import requests
 from requests.packages.urllib3.util.retry import Retry
 from requests.adapters import HTTPAdapter
+import sys
+
 import json
 
 from ltu.engine.result import Result, FICResult
@@ -51,8 +53,8 @@ class BaseClient(object):
           logger.info('API path found at: %s' % url)
           return True
       except:
-        pass
-    raise Exception("Could not connect to your application")
+        logger.critical("Could not connect to your application")
+        sys.exit(-1)
 
   def get_url(self, service):
     """Combine a service name and the server url to produce the service url.
@@ -190,8 +192,9 @@ class QueryClient(BaseClient):
         files['reference_image'] = open(reference_image, 'rb')
         files['query_image'] = open(query_image, 'rb')
     except Exception as e:
-        print('Could not open one of the input files: {}'.format(e))
-        raise e
+        logger.critical('Could not open one of the input files: {}'.format(e))
+        sys.exit(-1)
+
     result = self.open_service("FineComparison", files=files)
     return FICResult(result)
 
