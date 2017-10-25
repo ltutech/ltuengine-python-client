@@ -34,10 +34,19 @@ def run_single_task(items):
 
     if out_file:
         #launch action
-        result = action_function(in_file)
+        try:
+            result = action_function(in_file)
+        except Exception as e:
+            logger.critical('Could not perform the action {}: {}'.format(action,e))
+            sys.exit(-1)
 
         #save the result in a json file
-        result.save_json(out_file)
+        try:
+            result.save_json(out_file)
+        except Exception as e:
+            logger.critical('Could not save the result for the action {}: {}'.format(action,e))
+            sys.exit(-1)
+
 
 def run_task_mono_thread(action_function, files, action_label, nb_threads=1, offset=0):
     """Run given action on every files, one at a time.
@@ -46,8 +55,10 @@ def run_task_mono_thread(action_function, files, action_label, nb_threads=1, off
 
     for file in files[offset:]:
         items = (file,action_function)
-        print("%s: %s" % (action_label, file["in"]))
+        logger.info("")
+        logger.info("%s: %s" % (action_label, file["in"]))
         run_single_task(items)
+
 
 def run_task_multi_thread(action_function, files, action_label, nb_threads=2, offset=0):
     """Run given action on every files using a threading pool.
@@ -200,12 +211,12 @@ def ltuengine_process_dir(actions: "A list(separate each action by a comma) of a
                     logger.info("Deleting directory %s images from application %s" % (input_dir, application_key))
                     run_task(modifyClient.delete_imagefile, files, "Deleting image", nb_threads, offset)
                 elif action == actions[1]:
-                    logger.info("")
                     queryClient = QueryClient(application_key, server_url=host)
                     logger.info("Searching directory %s images into application %s" % (input_dir, application_key))
                     run_task(queryClient.search_image, files, "Searching image", nb_threads, offset)
 
                 end_time = (time.time() - start_time)
+
                 bench = "%s done, %d images, in %f sec on %d threads, %f images per sec" % (action, nb_files, end_time, nb_threads, nb_files/end_time)
                 logger.info(bench)
                 benchs.append(bench)
