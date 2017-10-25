@@ -39,7 +39,7 @@ def run_single_task(items):
         #save the result in a json file
         result.save_json(out_file)
 
-def run_task_mono_thread(action_function, files, action_label, force_action=True, nb_threads=1, offset=0):
+def run_task_mono_thread(action_function, files, action_label, nb_threads=1, offset=0):
     """Run given action on every files, one at a time.
     """
     items = ()
@@ -49,7 +49,7 @@ def run_task_mono_thread(action_function, files, action_label, force_action=True
         print("%s: %s" % (action_label, file["in"]))
         run_single_task(items)
 
-def run_task_multi_thread(action_function, files, action_label, force_action=True, nb_threads=2, offset=0):
+def run_task_multi_thread(action_function, files, action_label, nb_threads=2, offset=0):
     """Run given action on every files using a threading pool.
        It uses a progress bar instead of a usual verbose log.
     """
@@ -195,16 +195,16 @@ def ltuengine_process_dir(actions: "A list(separate each action by a comma) of a
                 # get the action to perform
                 if action == actions[0]:
                     logger.info("Adding directory %s images into application %s" % (input_dir, application_key))
-                    run_task(modifyClient.add_image, files, "Adding image", force, nb_threads, offset)
+                    run_task(modifyClient.add_image, files, "Adding image", nb_threads, offset)
                 elif action == actions[2]:
                     logger.info("Deleting directory %s images from application %s" % (input_dir, application_key))
-                    run_task(modifyClient.delete_imagefile, files, "Deleting image", force, nb_threads, offset)
+                    run_task(modifyClient.delete_imagefile, files, "Deleting image", nb_threads, offset)
                 elif action == actions[1]:
                     logger.info("")
                     queryClient = QueryClient(application_key, server_url=host)
                     logger.info("Searching directory %s images into application %s" % (input_dir, application_key))
-                    run_task(queryClient.search_image, files, "Searching image", force, nb_threads, offset)
-            
+                    run_task(queryClient.search_image, files, "Searching image", nb_threads, offset)
+
                 end_time = (time.time() - start_time)
                 bench = "%s done, %d images, in %f sec on %d threads, %f images per sec" % (action, nb_files, end_time, nb_threads, nb_files/end_time)
                 logger.info(bench)
