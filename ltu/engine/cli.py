@@ -12,10 +12,19 @@ from tqdm import tqdm
 
 from client import QueryClient, ModifyClient
 from ltu.engine.result import Result
-
+from ltu.engine.stat import Stat
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
+global stat
+stat = Stat()
+
+def print_stat(nb_threads):
+    """ print all the statistics global and per action """
+    stat.print_stat_global()
+    logger.info("")
+    stat.print_result_per_action(nb_threads)
 
 def get_action_name_from_function(function):
     """return from a function (add_image, search_image, delete_image) the name of the action concerned
@@ -29,15 +38,22 @@ def run_single_task(items):
     action_function = items[1]
     action = get_action_name_from_function(items[1])
     out_file = ""
+
     if  action in items[0]:
         out_file = items[0][action]
-
     if out_file:
         #launch action
         try:
             result = action_function(in_file)
+            logger.debug("Finish with status %s" %(result.status_code))
+            if result.status_code < 0:
+                logger.debug('An issue occuted with the file {}. Consult the json result. file'.format(in_file))
+                stat.nb_errors[action] += 1
+            else:
+                stat.treated[action] += 1
+
         except Exception as e:
-            logger.critical('Could not perform the action {}: {}'.format(action,e))
+            logger.critical('An issue has occured. Could not perform the action {}. The process is stopped: {}'.format(action,e))
             sys.exit(-1)
 
         #save the result in a json file
@@ -132,9 +148,11 @@ def generate_actions_list_per_images(actions_list, input_dir, force):
                     #the imge will be processed
                     if not os.path.exists(json_path) or force:
                         b_action = True
+                        stat.queries_to_treat += 1
                         files_path[action] = json_path
                     else:
                         #the image won't be performed
+                        stat.already += 1
                         logger.debug("%s action already performed for this file. You can consult the result in the Json file. To generate new result, delete the Json File or force the %s action by adding the --force parameter in the command." %(action, action))
 
                 if b_action:
@@ -184,18 +202,23 @@ def ltuengine_process_dir(actions: "A list(separate each action by a comma) of a
     # other parameters
     offset = int(offset)
 
-    #get input and output files path for each image
+    #lit of images to performed
     files = []
+    #get input and output files path for each image
     files = generate_actions_list_per_images(actions_list, input_dir, force)
 
     if files:
+        #nb images to treat
         nb_files = len(files) - offset
+        stat.submitted += len(files)
+        stat.to_treat += nb_files
+
         # create client
         logger.info("")
         modifyClient = ModifyClient(application_key, server_url=host)
-        benchs = []
 
         for nb_threads in all_threads:
+            nb_errors_before_treatment = stat.nb_errors
             for action in actions_list:
                 logger.info("")
                 start_time = time.time()
@@ -217,9 +240,9 @@ def ltuengine_process_dir(actions: "A list(separate each action by a comma) of a
 
                 end_time = (time.time() - start_time)
 
+                #save action statistics per
+                stat.set_result_per_action(action, end_time)
                 bench = "%s done, %d images, in %f sec on %d threads, %f images per sec" % (action, nb_files, end_time, nb_threads, nb_files/end_time)
-                logger.info(bench)
-                benchs.append(bench)
+                logger.debug(bench)
 
-        for bench in benchs:
-            print(bench)
+    print_stat(nb_threads)
