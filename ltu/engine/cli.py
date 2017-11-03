@@ -68,7 +68,6 @@ def run_task_mono_thread(action_function, files, action_label, nb_threads=1, off
     """Run given action on every files, one at a time.
     """
     items = ()
-
     for file in files[offset:]:
         items = (file,action_function)
         logger.info("")
@@ -111,12 +110,16 @@ def generate_actions_list_per_images(actions_list, input_dir, force):
         if not os.path.exists(action_path):
             try:
                 os.mkdir(action_path)
+
             except Exception as e:
                 logger.critical('Could not create the action {} out path: {}'.format(e,action))
                 sys.exit(-1)
 
     files = []
     b_file = False #indicate if there are files to performed
+    untreated = 0
+
+    image_path = os.path.basename(input_dir)
 
     for dirpath, _, fnames in os.walk(input_dir):
         #relative path from the input images folder, repertory per repertory
@@ -127,7 +130,15 @@ def generate_actions_list_per_images(actions_list, input_dir, force):
 
         #create actions repertories
         for action in actions_list:
-            complete_path = os.path.join(out_base_path, action, relativ_path)
+            complete_path = os.path.join(out_base_path, action, image_path)
+            if not os.path.exists(complete_path):
+                try:
+                    os.mkdir(complete_path)
+                except Exception as e:
+                    logger.critical('Could not create the out path {}: {}'.format(complete_path, e))
+                    sys.exit(-1)
+
+            complete_path = os.path.join(out_base_path, action, image_path, relativ_path)
             if not os.path.exists(complete_path):
                 try:
                     os.mkdir(complete_path)
@@ -143,7 +154,7 @@ def generate_actions_list_per_images(actions_list, input_dir, force):
                 files_path = {}
                 b_action = False
                 for action in actions_list:
-                    json_path = os.path.join(out_base_path, action, relativ_path, file) + ".json"
+                    json_path = os.path.join(out_base_path, action, image_path,relativ_path, file) + ".json"
                     #if the folder don't exist or if the action is forced to be executed
                     #the imge will be processed
                     if not os.path.exists(json_path) or force:
