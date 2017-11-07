@@ -17,8 +17,10 @@ from ltu.engine.stat import Stat
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+# TODO: Stat class is not thread safe, we should update it.
 global stat
 stat = Stat()
+
 
 def print_stat(nb_threads):
     """ print all the statistics global and per action """
@@ -26,23 +28,25 @@ def print_stat(nb_threads):
     logger.info("")
     stat.print_result_per_action(nb_threads)
 
+
 def get_action_name_from_function(function):
     """return from a function (add_image, search_image, delete_image) the name of the action concerned
     """
     return function.__name__.split('_')[0]
 
-def run_single_task(items):
+
+def run_single_task(item):
     """Run given action for one file
     """
-    in_file = items[0]["in"]
-    action_function = items[1]
-    action = get_action_name_from_function(items[1])
+    in_file = item[0]["in"]
+    action_function = item[1]
+    action = get_action_name_from_function(item[1])
     out_file = ""
 
-    if  action in items[0]:
-        out_file = items[0][action]
+    if action in item[0]:
+        out_file = item[0][action]
     if out_file:
-        #launch action
+        # launch action
         try:
             result = action_function(in_file)
             logger.debug("Finish with status %s" %(result.status_code))
@@ -56,7 +60,7 @@ def run_single_task(items):
             logger.critical('An issue has occured. Could not perform the action {}. The process is stopped: {}'.format(action,e))
             sys.exit(-1)
 
-        #save the result in a json file
+        # save the result in a json file
         try:
             result.save_json(out_file)
         except Exception as e:
@@ -67,12 +71,11 @@ def run_single_task(items):
 def run_task_mono_thread(action_function, files, action_label, nb_threads=1, offset=0):
     """Run given action on every files, one at a time.
     """
-    items = ()
     for file in files[offset:]:
-        items = (file,action_function)
+        item = (file, action_function)
         logger.info("")
         logger.info("%s: %s" % (action_label, file["in"]))
-        run_single_task(items)
+        run_single_task(item)
 
 
 def run_task_multi_thread(action_function, files, action_label, nb_threads=2, offset=0):
@@ -89,6 +92,7 @@ def run_task_multi_thread(action_function, files, action_label, nb_threads=2, of
     for item in progress_bar_items:
         pass
 
+
 def generate_actions_list_per_images(actions_list, input_dir, force):
     """Generate a list of actions to process per image. For each image are saved:
         - input path of the image
@@ -104,7 +108,7 @@ def generate_actions_list_per_images(actions_list, input_dir, force):
             logger.critical('Could not create the out path "out_result": {}'.format(e))
             sys.exit(-1)
 
-    #create one result folder per action
+    # create one result folder per action
     for action in actions_list:
         action_path = os.path.join(out_base_path, action)
         if not os.path.exists(action_path):
@@ -116,19 +120,19 @@ def generate_actions_list_per_images(actions_list, input_dir, force):
                 sys.exit(-1)
 
     files = []
-    b_file = False #indicate if there are files to performed
+    b_file = False # indicate if there are files to performed
     untreated = 0
 
     image_path = os.path.basename(input_dir)
 
     for dirpath, _, fnames in os.walk(input_dir):
-        #relative path from the input images folder, repertory per repertory
+        # relative path from the input images folder, repertory per repertory
         relativ_path = os.path.relpath(dirpath,input_dir)
 
         if relativ_path == ".":
             relativ_path = ""
 
-        #create actions repertories
+        # create actions repertories
         for action in actions_list:
             complete_path = os.path.join(out_base_path, action, image_path)
             if not os.path.exists(complete_path):
@@ -149,20 +153,21 @@ def generate_actions_list_per_images(actions_list, input_dir, force):
         for file in fnames:
             # files_path["in"]: input image file path
             # files_path[action]: result json file path per action
-            if not file == ".DS_Store": #Exept Mac store file
+            if not file == ".DS_Store":
+                # Except Mac store file
                 b_file = True
                 files_path = {}
                 b_action = False
                 for action in actions_list:
                     json_path = os.path.join(out_base_path, action, image_path,relativ_path, file) + ".json"
-                    #if the folder don't exist or if the action is forced to be executed
-                    #the imge will be processed
+                    # if the folder don't exist or if the action is forced to be executed
+                    # the imge will be processed
                     if not os.path.exists(json_path) or force:
                         b_action = True
                         stat.queries_to_treat += 1
                         files_path[action] = json_path
                     else:
-                        #the image won't be performed
+                        # the image won't be performed
                         stat.already += 1
                         logger.debug("%s action already performed for this file. You can consult the result in the Json file. To generate new result, delete the Json File or force the %s action by adding the --force parameter in the command." %(action, action))
 
@@ -170,13 +175,14 @@ def generate_actions_list_per_images(actions_list, input_dir, force):
                     files_path["in"] = os.path.join(dirpath, file)
                     files.append(files_path)
 
-    #if no file to treat
+    # if no file to treat
     if not b_file and not files:
         assert files, "No input file found in %s" % input_dir
     elif b_file and not files:
-        logger.info ("No new file to process. Delete old results folders or force the treatment by adding the --force parameter in the command.")
+        logger.info("No new file to process. Delete old results folders or force the treatment by adding the --force parameter in the command.")
 
     return files
+
 
 @begin.start
 def ltuengine_process_dir(actions: "A list(separate each action by a comma) of actions to execute on a folder: add|delete|search or bench(that performs 'delete,add,search,delete') ",
@@ -199,8 +205,8 @@ def ltuengine_process_dir(actions: "A list(separate each action by a comma) of a
         force = True # for a bench actions are forced to be performed
     actions_list = actions.split(',')
 
-    #verify if the action call is valid
-    actions = ["add","search","delete"]
+    # verify if the action call is valid
+    actions = ["add", "search", "delete"]
     for a in actions_list:
         if a not in actions:
             logger.error("Unknown action {}".format(a))
@@ -213,13 +219,13 @@ def ltuengine_process_dir(actions: "A list(separate each action by a comma) of a
     # other parameters
     offset = int(offset)
 
-    #lit of images to performed
+    # lit of images to performed
     files = []
-    #get input and output files path for each image
+    # get input and output files path for each image
     files = generate_actions_list_per_images(actions_list, input_dir, force)
 
     if files:
-        #nb images to treat
+        # nb images to treat
         nb_files = len(files) - offset
         stat.submitted += len(files)
         stat.to_treat += nb_files
@@ -251,7 +257,7 @@ def ltuengine_process_dir(actions: "A list(separate each action by a comma) of a
 
                 end_time = (time.time() - start_time)
 
-                #save action statistics per
+                # save action statistics per
                 stat.set_result_per_action(action, end_time)
                 bench = "%s done, %d images, in %f sec on %d threads, %f images per sec" % (action, nb_files, end_time, nb_threads, nb_files/end_time)
                 logger.debug(bench)
