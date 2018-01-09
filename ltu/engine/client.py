@@ -52,8 +52,8 @@ class BaseClient(object):
         if status:
           logger.info('API path found at: %s' % url)
           return True
-      except:
-        logger.critical("Could not connect to your application")
+      except Exception as e:
+        logger.critical("Could not connect to your application: %s", e)
         sys.exit(-1)
 
   def get_url(self, service):
