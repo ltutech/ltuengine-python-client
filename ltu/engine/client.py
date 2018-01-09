@@ -42,7 +42,7 @@ class BaseClient(object):
        It will try them all to perform auto-discovery of the right URL.
     """
     logger.info('Auto discovering API path with base server URL: %s' % self.base_server_url)
-    full_urls = ["%s%s" % (self.base_server_url, url) for url in url_list]
+    full_urls = [self.base_server_url] + ["%s%s" % (self.base_server_url, url) for url in url_list]
     # Test all API paths
     for url in full_urls:
       try:
