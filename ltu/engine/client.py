@@ -59,7 +59,10 @@ class BaseClient(object):
   def get_url(self, service):
     """Combine a service name and the server url to produce the service url.
     """
-    return requests.compat.urljoin(self.server_url, service)
+    logger.debug("Joining URLs %s and %s" % (self.server_url, service))
+    url = requests.compat.urljoin("%s/" % self.server_url, service)
+    logger.debug("Final URL: %s" % url)
+    return url
 
   def get_data(self, params={}):
     """Return appropriate HTTP POST parameters and optional file
