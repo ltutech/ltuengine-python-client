@@ -42,7 +42,7 @@ class BaseClient(object):
        It will try them all to perform auto-discovery of the right URL.
     """
     logger.info('Auto discovering API path with base server URL: %s' % self.base_server_url)
-    full_urls = ["%s%s" % (self.base_server_url, url) for url in url_list]
+    full_urls = [self.base_server_url] + ["%s%s" % (self.base_server_url, url) for url in url_list]
     # Test all API paths
     for url in full_urls:
       try:
@@ -52,14 +52,17 @@ class BaseClient(object):
         if status:
           logger.info('API path found at: %s' % url)
           return True
-      except:
-        logger.critical("Could not connect to your application")
+      except Exception as e:
+        logger.critical("Could not connect to your application: %s", e)
         sys.exit(-1)
 
   def get_url(self, service):
     """Combine a service name and the server url to produce the service url.
     """
-    return requests.compat.urljoin(self.server_url, service)
+    logger.debug("Joining URLs %s and %s" % (self.server_url, service))
+    url = requests.compat.urljoin("%s/" % self.server_url, service)
+    logger.debug("Final URL: %s" % url)
+    return url
 
   def get_data(self, params={}):
     """Return appropriate HTTP POST parameters and optional file
